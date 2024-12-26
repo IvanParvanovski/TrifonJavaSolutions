@@ -54,12 +54,12 @@ public class Node {
         return null;
     }
 
-    public Edge[] deepCopyAdjacencyList() {
-        Edge[] deepCopyEdges = new Edge[this.adjacencyList.length];
-        for (int i = 0; i < this.adjacencyList.length; i++) {
-            Edge edge = this.adjacencyList[i];
-            deepCopyEdges[i] = new Edge(edge.startNode, edge.endNode, edge.direction);
+    public String getDirectionNameByNode(Node nextNode) {
+        for (Edge edge : this.adjacencyList) {
+            if (edge.endNode == nextNode) {
+                return edge.direction.getName();
+            }
         }
-        return deepCopyEdges;
+        return null;
     }
 }

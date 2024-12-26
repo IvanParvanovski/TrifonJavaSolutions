@@ -18,6 +18,8 @@ public class MainSolutionA {
 
     private static Node[][] matrix;
     private static Node target;
+    private static int matrixRows;
+    private static int matrixCols;
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
@@ -34,15 +36,16 @@ public class MainSolutionA {
             String command = splitInput[0];
 
             if (command.equalsIgnoreCase("new")) {
-                int cols = Integer.parseInt(splitInput[1]);
-                int rows = Integer.parseInt(splitInput[2]);
+                matrixCols = Integer.parseInt(splitInput[1]);
+                matrixRows = Integer.parseInt(splitInput[2]);
 
-                Object[] result = readMatrix(rows, cols);
+
+                Object[] result = readMatrix(matrixRows, matrixCols);
                 matrix = (Node[][]) result[0];
                 rover = (Node) result[1];
 
-                printMatrix(rows, cols);
-                setEachNodeAdjacencyList(rows, cols);
+                printMatrix(matrixRows, matrixCols);
+                setEachNodeAdjacencyList(matrixRows, matrixCols);
             }
             else if (command.equalsIgnoreCase("up")
                     || command.equalsIgnoreCase("down")
@@ -87,10 +90,41 @@ public class MainSolutionA {
                     rover = neighbourNode;
                 }
             } else if (command.equalsIgnoreCase("debug")) {
-                System.out.println("debug");
+                printMatrix(matrixRows, matrixCols);
             } else if (command.equalsIgnoreCase("path")) {
                 List<Node> path = BFS(rover);
                 System.out.println(path);
+
+                if (path == null) {
+                    System.out.println("error msg no path");
+                    return;
+                }
+
+                String currentDirection = "";
+                int currentDirectionCount = 0;
+                for (int i = 0; i < path.size() - 1; i++) {
+
+                    Node currentNode = path.get(i);
+                    Node nextNode = path.get(i + 1);
+
+                    String direction = currentNode.getDirectionNameByNode(nextNode);
+
+                    if (!direction.equalsIgnoreCase(currentDirection)) {
+                        if (i != 0) {
+                            System.out.printf("%s%s%n",
+                                    currentDirection,
+                                    (currentDirectionCount != 1) ? " " + currentDirectionCount : "");
+                        }
+
+
+                        currentDirection = direction;
+                        currentDirectionCount = 0;
+                    }
+                    currentDirectionCount += 1;
+                }
+                System.out.printf("%s%s%n",
+                        currentDirection,
+                        (currentDirectionCount != 1) ? " " + currentDirectionCount : "");
             } else if (command.equalsIgnoreCase("debug-path")) {
                 System.out.println("debug-path");
             }
@@ -124,10 +158,9 @@ public class MainSolutionA {
     }
 
     public static void printMatrix(int rows, int cols) {
-        System.out.println("Matrix:");
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                System.out.print(matrix[i][j].getSymbol() + " ");
+                System.out.print(matrix[i][j].getSymbol() + "");
             }
             System.out.println();
         }
