@@ -52,7 +52,8 @@ public class MainSolutionA {
             } else if (command.equalsIgnoreCase("debug")) {
                 System.out.println("debug");
             } else if (command.equalsIgnoreCase("path")) {
-                BFS();
+                List<Node> path = BFS();
+                System.out.println(path);
             } else if (command.equalsIgnoreCase("debug-path")) {
                 System.out.println("debug-path");
             }
@@ -141,7 +142,7 @@ public class MainSolutionA {
         }
     }
 
-    public static void BFS() {
+    public static List<Node> BFS() {
         // The algorithm explores each node at degree 1, then 2, then 3, ...
         // It doesn't add the nodes that have symbols in the obstacles set
 
@@ -151,16 +152,14 @@ public class MainSolutionA {
         queue.add(initialPath);
         rover.setVisited(true);
 
-        List<List<Node>> allPaths = new ArrayList<>();
-
         while (!queue.isEmpty()) {
             List<Node> currentPath = queue.poll();
-            Node currentNode = currentPath.get(currentPath.size() - 1); // Get the last node of the path
+            // Get the last node of the path
+            Node currentNode = currentPath.get(currentPath.size() - 1);
 
             // If we reach the target, add the current path to the list of all paths
             if (currentNode == target) {
-                allPaths.add(new ArrayList<>(currentPath)); // Store the found path
-                System.out.println("Found path to target: " + currentPath);
+                return currentPath;
             }
 
             // Explore all adjacent nodes
@@ -169,7 +168,7 @@ public class MainSolutionA {
 
                 // Check if the next node is not visited and not an obstacle
                 if (nextNode != null && !nextNode.getVisited() && !OBSTACLES_SET.contains(nextNode.getSymbol())) {
-                    nextNode.setVisited(true); // Mark node as visited
+                    nextNode.setVisited(true);
 
                     // Create a new path by adding the next node to the current path
                     List<Node> newPath = new ArrayList<>(currentPath);
@@ -180,14 +179,6 @@ public class MainSolutionA {
             }
         }
 
-        // After BFS, print all found distinct paths
-        if (allPaths.isEmpty()) {
-            System.out.println("No path found.");
-        } else {
-            System.out.println("All distinct paths found:");
-            for (List<Node> path : allPaths) {
-                System.out.println(path);
-            }
-        }
+        return null;
     }
 }
