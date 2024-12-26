@@ -16,6 +16,23 @@ public class Edge {
         this.direction = direction;
     }
 
+    @Override
+    public String toString() {
+        String endNodeDebugMsg = "";
+
+        if (this.endNode != null) {
+            endNodeDebugMsg = String.valueOf(this.endNode.symbol);
+        } else {
+            endNodeDebugMsg = "null";
+        }
+
+
+        return String.format("Edge{startNode=%s, endNode=%s, direction=%s}",
+                this.startNode.symbol,
+                endNodeDebugMsg,
+                this.direction.getName());
+    }
+
     public Node getStartNode() {
         return startNode;
     }

@@ -1,5 +1,7 @@
 package TaskA;
 
+import TaskA.directions.*;
+
 import java.util.Scanner;
 import java.util.Set;
 
@@ -10,6 +12,11 @@ public class MainSolutionA {
     private static final Node TARGET_SYMBOL = new Node('x');
     private static final Set<Character> OBSTACLES_SET = Set.of('/', '\\', '|', '_', '*');
     private static Node[][] matrix;
+
+    private static DirectionUp directionUp = new DirectionUp();
+    private static DirectionDown directionDown = new DirectionDown();
+    private static DirectionLeft directionLeft = new DirectionLeft();
+    private static DirectionRight directionRight = new DirectionRight();
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
@@ -30,6 +37,8 @@ public class MainSolutionA {
 
                 matrix = readMatrix(rows, cols);
                 printMatrix(rows, cols);
+                setEachNodeAdjacencyList(rows, cols);
+                System.out.println(matrix);
             }
             else if (command.equalsIgnoreCase("up")) {
                 System.out.println("up");
@@ -73,6 +82,54 @@ public class MainSolutionA {
                 System.out.print(matrix[i][j].getSymbol() + " ");
             }
             System.out.println();
+        }
+    }
+
+    public static void setEachNodeAdjacencyList(int rows, int cols) {
+        for (int i = 0; i < rows; i++) {
+            Node[] currentRow = matrix[i];
+
+            for (int j = 0; j < cols; j++) {
+                Node currentNode = currentRow[j];
+                Node upNode, downNode, leftNode, rightNode;
+
+                // Up Node to the current Node
+                if (i == 0) {
+                    upNode = null;
+                } else {
+                    upNode = matrix[i - 1][j];
+                }
+
+                // Down Node to the current Node
+                if (i == rows - 1) {
+                    downNode = null;
+                } else {
+                    downNode = matrix[i + 1][j];
+                }
+
+                // Right Node to the current Node
+                if (j == cols - 1) {
+                    rightNode = null;
+                } else {
+                    rightNode = matrix[i][j + 1];
+                }
+
+                // Left Node to the current Node
+                if (j == 0) {
+                    leftNode = null;
+                } else {
+                    leftNode = matrix[i][j - 1];
+                }
+
+                // Create the links to current node
+                Edge upEdge = new Edge(currentNode, upNode, directionUp);
+                Edge downEdge = new Edge(currentNode, downNode, directionDown);
+                Edge rightEdge = new Edge(currentNode, rightNode, directionRight);
+                Edge leftEdge = new Edge(currentNode, leftNode, directionLeft);
+
+                Edge[] currentNodeAdjacencyList = new Edge[]{ upEdge, downEdge, rightEdge, leftEdge };
+                currentNode.setAdjacencyList(currentNodeAdjacencyList);
+            }
         }
     }
 }

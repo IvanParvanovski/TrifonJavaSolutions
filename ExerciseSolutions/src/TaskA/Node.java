@@ -5,6 +5,7 @@ public class Node {
 
     char symbol;
     boolean visited;
+    Edge[] adjacencyList = new Edge[4];
 
     public char getSymbol() {
         return this.symbol;
@@ -22,10 +23,21 @@ public class Node {
         this.visited = visited;
     }
 
+    public Edge[] getAdjacencyList() {
+        return this.adjacencyList;
+    }
+
+    public void setAdjacencyList(Edge[] adjacencyList) {
+        this.adjacencyList = adjacencyList;
+    }
+
     public Node(char symbol) {
         this.symbol = symbol;
         this.visited = false;
     }
 
-
+    @Override
+    public String toString() {
+        return String.format("Node{symbol=%s, visited=%b}", this.symbol, this.visited);
+    }
 }
