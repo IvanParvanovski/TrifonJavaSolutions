@@ -2,21 +2,26 @@ package TaskA;
 
 import TaskA.directions.*;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
 
 public class MainSolutionA {
     // GRID-LIKE Graph
 
-    private static final Node ROVER_SYMBOL = new Node('R');
-    private static final Node TARGET_SYMBOL = new Node('x');
+    private static final char ROVER_SYMBOL = 'R';
+    private static final char TARGET_SYMBOL = 'x';
     private static final Set<Character> OBSTACLES_SET = Set.of('/', '\\', '|', '_', '*');
-    private static Node[][] matrix;
 
-    private static DirectionUp directionUp = new DirectionUp();
-    private static DirectionDown directionDown = new DirectionDown();
-    private static DirectionLeft directionLeft = new DirectionLeft();
-    private static DirectionRight directionRight = new DirectionRight();
+    private static final DirectionUp DIRECTION_UP = new DirectionUp();
+    private static final DirectionDown DIRECTION_DOWN = new DirectionDown();
+    private static final DirectionLeft DIRECTION_LEFT = new DirectionLeft();
+    private static final DirectionRight DIRECTION_RIGHT = new DirectionRight();
+
+    private static Node[][] matrix;
+    private static Node rover;
+    private static Node target;
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
@@ -38,7 +43,6 @@ public class MainSolutionA {
                 matrix = readMatrix(rows, cols);
                 printMatrix(rows, cols);
                 setEachNodeAdjacencyList(rows, cols);
-                System.out.println(matrix);
             }
             else if (command.equalsIgnoreCase("up")) {
                 System.out.println("up");
@@ -51,11 +55,10 @@ public class MainSolutionA {
             } else if (command.equalsIgnoreCase("debug")) {
                 System.out.println("debug");
             } else if (command.equalsIgnoreCase("path")) {
-                System.out.println("path");
+                BFS();
             } else if (command.equalsIgnoreCase("debug-path")) {
                 System.out.println("debug-path");
             }
-
         }
     }
 
@@ -68,7 +71,15 @@ public class MainSolutionA {
 
             for (int j = 0; j < cols; j++) {
                 char symbol = currentRow[j];
-                matrix[i][j] = new Node(symbol);
+                Node currentNode = new Node(symbol);
+
+                if (symbol == ROVER_SYMBOL) {
+                    rover = currentNode;
+                } else if (symbol == TARGET_SYMBOL) {
+                    target = currentNode;
+                }
+
+                matrix[i][j] = currentNode;
             }
         }
 
@@ -122,13 +133,42 @@ public class MainSolutionA {
                 }
 
                 // Create the links to current node
-                Edge upEdge = new Edge(currentNode, upNode, directionUp);
-                Edge downEdge = new Edge(currentNode, downNode, directionDown);
-                Edge rightEdge = new Edge(currentNode, rightNode, directionRight);
-                Edge leftEdge = new Edge(currentNode, leftNode, directionLeft);
+                Edge upEdge = new Edge(currentNode, upNode, DIRECTION_UP);
+                Edge downEdge = new Edge(currentNode, downNode, DIRECTION_DOWN);
+                Edge rightEdge = new Edge(currentNode, rightNode, DIRECTION_RIGHT);
+                Edge leftEdge = new Edge(currentNode, leftNode, DIRECTION_LEFT);
 
                 Edge[] currentNodeAdjacencyList = new Edge[]{ upEdge, downEdge, rightEdge, leftEdge };
                 currentNode.setAdjacencyList(currentNodeAdjacencyList);
+            }
+        }
+    }
+
+    public static void BFS() {
+        // The algorithm explores each node at degree 1, then 2, then 3, ...
+        // It doesn't add the nodes that have symbols in the obstacles set
+
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(rover);
+        rover.setVisited(true);
+
+        while (!queue.isEmpty()) {
+            Node currentNode = queue.poll();
+            System.out.println(currentNode);
+
+            if (currentNode == target) {
+                System.out.println("found target");
+                return;
+            }
+
+            for (Edge incidentEdge : currentNode.getAdjacencyList()) {
+                if (incidentEdge.getEndNode() != null) {
+                    if (!incidentEdge.endNode.visited && !OBSTACLES_SET.contains(incidentEdge.endNode.getSymbol())) {
+                        queue.add(incidentEdge.endNode);
+                        incidentEdge.endNode.setVisited(true);
+                    }
+                }
+                // increase degree and check if it is different
             }
         }
     }
