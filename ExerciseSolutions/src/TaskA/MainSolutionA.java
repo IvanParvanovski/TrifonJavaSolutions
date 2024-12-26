@@ -54,29 +54,38 @@ public class MainSolutionA {
                     return;
                 }
 
-                Node neighbourNode = null;
-
-                if (command.equalsIgnoreCase("up")) {
-                    neighbourNode = rover.findNodeByDirectionName("up");
-                } else if (command.equalsIgnoreCase("down")) {
-                    neighbourNode = rover.findNodeByDirectionName("down");
-                } else if (command.equalsIgnoreCase("left")) {
-                    neighbourNode = rover.findNodeByDirectionName("left");
-                } else if (command.equalsIgnoreCase("right")) {
-                    neighbourNode = rover.findNodeByDirectionName("right");
+                int count = 1;
+                if (splitInput.length > 1) {
+                    count = Integer.parseInt(splitInput[1]);
                 }
 
-                if (neighbourNode == null) {
-                    System.out.println("Invalid command!");
-                    return;
+                for (int i = 0; i < count; i++) {
+                    Node neighbourNode = null;
+
+                    if (command.equalsIgnoreCase("up")) {
+                        neighbourNode = rover.findNodeByDirectionName("up");
+                    } else if (command.equalsIgnoreCase("down")) {
+                        neighbourNode = rover.findNodeByDirectionName("down");
+                    } else if (command.equalsIgnoreCase("left")) {
+                        neighbourNode = rover.findNodeByDirectionName("left");
+                    } else if (command.equalsIgnoreCase("right")) {
+                        neighbourNode = rover.findNodeByDirectionName("right");
+                    }
+
+                    if (neighbourNode == null) {
+                        System.out.println("Out of map or obstacle!");
+                        break;
+                    }
+
+                    // Swap the adjacent nodes
+                    char neighbourNodeSymbol = neighbourNode.getSymbol();
+                    if (OBSTACLES_SET.contains(neighbourNodeSymbol)) {
+                        break;
+                    }
+                    neighbourNode.setSymbol(rover.getSymbol());
+                    rover.setSymbol(neighbourNodeSymbol);
+                    rover = neighbourNode;
                 }
-
-                // Swap the adjacent nodes
-                char neighbourNodeSymbol = neighbourNode.getSymbol();
-                neighbourNode.setSymbol(rover.getSymbol());
-                rover.setSymbol(neighbourNodeSymbol);
-                rover = neighbourNode;
-
             } else if (command.equalsIgnoreCase("debug")) {
                 System.out.println("debug");
             } else if (command.equalsIgnoreCase("path")) {
