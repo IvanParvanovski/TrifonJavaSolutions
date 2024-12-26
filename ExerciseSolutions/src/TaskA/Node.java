@@ -1,5 +1,7 @@
 package TaskA;
 
+import java.util.Arrays;
+
 public class Node {
     // This class represents each cell in the map
 
@@ -39,5 +41,25 @@ public class Node {
     @Override
     public String toString() {
         return String.format("Node{symbol=%s, visited=%b}", this.symbol, this.visited);
+    }
+
+    public Node findNodeByDirectionName(String directionName) {
+        for (Edge e : this.adjacencyList) {
+            if (e.getDirection().getName().equalsIgnoreCase(directionName)) {
+                return e.getEndNode();
+            }
+        }
+
+        System.out.println("Direction Not Found!");
+        return null;
+    }
+
+    public Edge[] deepCopyAdjacencyList() {
+        Edge[] deepCopyEdges = new Edge[this.adjacencyList.length];
+        for (int i = 0; i < this.adjacencyList.length; i++) {
+            Edge edge = this.adjacencyList[i];
+            deepCopyEdges[i] = new Edge(edge.startNode, edge.endNode, edge.direction);
+        }
+        return deepCopyEdges;
     }
 }

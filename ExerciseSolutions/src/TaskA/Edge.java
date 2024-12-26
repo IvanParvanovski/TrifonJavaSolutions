@@ -26,7 +26,6 @@ public class Edge {
             endNodeDebugMsg = "null";
         }
 
-
         return String.format("Edge{startNode=%s, endNode=%s, direction=%s}",
                 this.startNode.symbol,
                 endNodeDebugMsg,

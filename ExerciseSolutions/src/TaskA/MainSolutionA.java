@@ -17,11 +17,11 @@ public class MainSolutionA {
     private static final DirectionRight DIRECTION_RIGHT = new DirectionRight();
 
     private static Node[][] matrix;
-    private static Node rover;
     private static Node target;
 
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
+        Node rover = null;
 
         while (true) {
             String userInput = input.nextLine();
@@ -37,22 +37,50 @@ public class MainSolutionA {
                 int cols = Integer.parseInt(splitInput[1]);
                 int rows = Integer.parseInt(splitInput[2]);
 
-                matrix = readMatrix(rows, cols);
+                Object[] result = readMatrix(rows, cols);
+                matrix = (Node[][]) result[0];
+                rover = (Node) result[1];
+
                 printMatrix(rows, cols);
                 setEachNodeAdjacencyList(rows, cols);
             }
-            else if (command.equalsIgnoreCase("up")) {
-                System.out.println("up");
-            } else if (command.equalsIgnoreCase("down")) {
-                System.out.println("down");
-            } else if (command.equalsIgnoreCase("left")) {
-                System.out.println("left");
-            } else if (command.equalsIgnoreCase("right")) {
-                System.out.println("right");
+            else if (command.equalsIgnoreCase("up")
+                    || command.equalsIgnoreCase("down")
+                    || command.equalsIgnoreCase("left")
+                    || command.equalsIgnoreCase("right")) {
+
+                if (rover == null) {
+                    System.out.println("Rover not initialised!");
+                    return;
+                }
+
+                Node neighbourNode = null;
+
+                if (command.equalsIgnoreCase("up")) {
+                    neighbourNode = rover.findNodeByDirectionName("up");
+                } else if (command.equalsIgnoreCase("down")) {
+                    neighbourNode = rover.findNodeByDirectionName("down");
+                } else if (command.equalsIgnoreCase("left")) {
+                    neighbourNode = rover.findNodeByDirectionName("left");
+                } else if (command.equalsIgnoreCase("right")) {
+                    neighbourNode = rover.findNodeByDirectionName("right");
+                }
+
+                if (neighbourNode == null) {
+                    System.out.println("Invalid command!");
+                    return;
+                }
+
+                // Swap the adjacent nodes
+                char neighbourNodeSymbol = neighbourNode.getSymbol();
+                neighbourNode.setSymbol(rover.getSymbol());
+                rover.setSymbol(neighbourNodeSymbol);
+                rover = neighbourNode;
+
             } else if (command.equalsIgnoreCase("debug")) {
                 System.out.println("debug");
             } else if (command.equalsIgnoreCase("path")) {
-                List<Node> path = BFS();
+                List<Node> path = BFS(rover);
                 System.out.println(path);
             } else if (command.equalsIgnoreCase("debug-path")) {
                 System.out.println("debug-path");
@@ -60,9 +88,11 @@ public class MainSolutionA {
         }
     }
 
-    public static Node[][] readMatrix(int rows, int cols) {
+    public static Object[] readMatrix(int rows, int cols) {
+        // it returns the matrix and the rover node
         Scanner input = new Scanner(System.in);
         Node[][] matrix = new Node[rows][cols];
+        Node rover = null;
 
         for (int i = 0; i < rows; i++) {
             char[] currentRow = input.nextLine().toCharArray();
@@ -81,7 +111,7 @@ public class MainSolutionA {
             }
         }
 
-        return matrix;
+        return new Object[]{matrix, rover};
     }
 
     public static void printMatrix(int rows, int cols) {
@@ -142,7 +172,7 @@ public class MainSolutionA {
         }
     }
 
-    public static List<Node> BFS() {
+    public static List<Node> BFS(Node rover) {
         // The algorithm explores each node at degree 1, then 2, then 3, ...
         // It doesn't add the nodes that have symbols in the obstacles set
 
