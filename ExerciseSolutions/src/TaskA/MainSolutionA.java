@@ -184,7 +184,14 @@ public class MainSolutionA {
             }
         }
 
+        // When all special symbols are missing
         if (overlap == null && rover == null && target == null) {
+            System.out.println("ERROR");
+            return null;
+        }
+
+        // When either the rover or the target symbols are missing
+        if (overlap == null && (rover == null || target == null)) {
             System.out.println("ERROR");
             return null;
         }
