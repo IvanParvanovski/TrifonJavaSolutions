@@ -60,7 +60,7 @@ public class MainSolutionA {
 
                 matrix = userInputMatrix;
 
-                printMatrix(matrixRows, matrixCols);
+//                printMatrix(matrixRows, matrixCols);
                 setEachNodeAdjacencyList(matrixRows, matrixCols);
             }
             else if (command.equalsIgnoreCase("up")
