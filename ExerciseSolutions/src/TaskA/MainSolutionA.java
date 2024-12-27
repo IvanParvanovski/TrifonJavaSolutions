@@ -127,6 +127,12 @@ public class MainSolutionA {
                 // Print the path if it exists
                 printPathDirections(path);
             } else if (command.equalsIgnoreCase("debug-path")) {
+                // When you have that x and R overlaps
+                if (overlap != null && rover == null && target == null) {
+                    printMatrix(matrixRows, matrixCols);
+                    continue;
+                }
+
                 List<Node> path = BFS(rover);
                 resetVisitedNodesAfterPathCalculation(matrixRows, matrixCols);
 
