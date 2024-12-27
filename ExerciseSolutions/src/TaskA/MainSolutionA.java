@@ -3,6 +3,7 @@ package TaskA;
 import TaskA.directions.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,10 +12,13 @@ public class MainSolutionA {
 
     private static final char ROVER_SYMBOL = 'R';
     private static final char TARGET_SYMBOL = 'x';
+    private static final char OVERLAP_SYMBOL = 'X';
+    private static final char SPACE_SYMBOL = '␣';
+
     private static final Set<Character> OBSTACLES_SET = Set.of('/', '\\', '|', '_', '*');
     private static final Set<Character> ALLOWED_SYMBOLS = Stream.concat(
             OBSTACLES_SET.stream(),
-            Stream.of(ROVER_SYMBOL, TARGET_SYMBOL, '␣')
+            Stream.of(ROVER_SYMBOL, TARGET_SYMBOL, OVERLAP_SYMBOL, SPACE_SYMBOL)
     ).collect(Collectors.toSet());
 
     private static final DirectionUp DIRECTION_UP = new DirectionUp();
@@ -23,13 +27,15 @@ public class MainSolutionA {
     private static final DirectionRight DIRECTION_RIGHT = new DirectionRight();
 
     private static Node[][] matrix;
-    private static Node target;
     private static int matrixRows;
     private static int matrixCols;
 
+    private static Node target = null;
+    private static Node overlap = null;
+    private static Node rover = null;
+
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        Node rover = null;
 
         while (true) {
             String userInput = input.nextLine();
@@ -45,14 +51,14 @@ public class MainSolutionA {
                 matrixCols = Integer.parseInt(splitInput[1]);
                 matrixRows = Integer.parseInt(splitInput[2]);
 
-                Object[] result = readMatrix(matrixRows, matrixCols);
+                Node[][] userInputMatrix = readMatrix(matrixRows, matrixCols);
 
-                if (result[0] == null || result[1] == null) {
+                // The matrix is not set because the input matrix was invalid
+                if (userInputMatrix == null) {
                     continue;
                 }
 
-                matrix = (Node[][]) result[0];
-                rover = (Node) result[1];
+                matrix = userInputMatrix;
 
                 printMatrix(matrixRows, matrixCols);
                 setEachNodeAdjacencyList(matrixRows, matrixCols);
@@ -64,7 +70,7 @@ public class MainSolutionA {
 
                 if (rover == null) {
                     System.out.println("Rover not initialised!");
-                    return;
+                    continue;
                 }
 
                 int count = 1;
@@ -86,7 +92,6 @@ public class MainSolutionA {
                     }
 
                     if (neighbourNode == null) {
-                        System.out.println("Out of map or obstacle!");
                         break;
                     }
 
@@ -100,8 +105,16 @@ public class MainSolutionA {
                     rover = neighbourNode;
                 }
             } else if (command.equalsIgnoreCase("debug")) {
+                // Display the map with the current positions of the target and the
                 printMatrix(matrixRows, matrixCols);
             } else if (command.equalsIgnoreCase("path")) {
+                // Special case where the rover and the target overlap
+                if (overlap != null && rover == null && target == null) {
+                    System.out.println("PATH 0");
+                    continue;
+                }
+
+                // Calculate path and reset the nodes if you want to repeat the command
                 List<Node> path = BFS(rover);
                 resetVisitedNodesAfterPathCalculation(matrixRows, matrixCols);
 
@@ -111,6 +124,7 @@ public class MainSolutionA {
                     continue;
                 }
 
+                // Print the path if it exists
                 printPathDirections(path);
             } else if (command.equalsIgnoreCase("debug-path")) {
                 List<Node> path = BFS(rover);
@@ -126,8 +140,9 @@ public class MainSolutionA {
         }
     }
 
-    public static Object[] readMatrix(int rows, int cols) {
-        // It returns the matrix and the rover node
+    public static Node[][] readMatrix(int rows, int cols) {
+        // It returns the matrix and sets the target, rover and overlap if they exist
+
         Scanner input = new Scanner(System.in);
         Node[][] matrix = new Node[rows][cols];
         Node rover = null;
@@ -137,7 +152,7 @@ public class MainSolutionA {
 
             if (currentRow.length == 0) {
                 System.out.println("ERROR");
-                return new Object[]{null, null};
+                return null;
             }
 
             for (int j = 0; j < cols; j++) {
@@ -145,22 +160,30 @@ public class MainSolutionA {
 
                 if (!ALLOWED_SYMBOLS.contains(symbol)) {
                     System.out.println("ERROR");
-                    return new Object[]{null, null};
+                    return null;
                 }
 
                 Node currentNode = new Node(symbol);
 
+                // If it finds the special symbols like rover it sets them
                 if (symbol == ROVER_SYMBOL) {
                     rover = currentNode;
                 } else if (symbol == TARGET_SYMBOL) {
                     target = currentNode;
+                } else if (symbol == OVERLAP_SYMBOL) {
+                    overlap = currentNode;
                 }
 
                 matrix[i][j] = currentNode;
             }
         }
 
-        return new Object[]{matrix, rover};
+        if (overlap == null && rover == null && target == null) {
+            System.out.println("ERROR");
+            return null;
+        }
+
+        return matrix;
     }
 
     public static List<Node> BFS(Node rover) {
