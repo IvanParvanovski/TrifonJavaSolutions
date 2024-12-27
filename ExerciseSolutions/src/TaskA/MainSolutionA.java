@@ -3,6 +3,8 @@ package TaskA;
 import TaskA.directions.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainSolutionA {
     // GRID-LIKE Graph
@@ -10,6 +12,10 @@ public class MainSolutionA {
     private static final char ROVER_SYMBOL = 'R';
     private static final char TARGET_SYMBOL = 'x';
     private static final Set<Character> OBSTACLES_SET = Set.of('/', '\\', '|', '_', '*');
+    private static final Set<Character> ALLOWED_SYMBOLS = Stream.concat(
+            OBSTACLES_SET.stream(),
+            Stream.of(ROVER_SYMBOL, TARGET_SYMBOL, ' ')
+    ).collect(Collectors.toSet());
 
     private static final DirectionUp DIRECTION_UP = new DirectionUp();
     private static final DirectionDown DIRECTION_DOWN = new DirectionDown();
@@ -40,6 +46,11 @@ public class MainSolutionA {
                 matrixRows = Integer.parseInt(splitInput[2]);
 
                 Object[] result = readMatrix(matrixRows, matrixCols);
+
+                if (result[0] == null || result[1] == null) {
+                    continue;
+                }
+
                 matrix = (Node[][]) result[0];
                 rover = (Node) result[1];
 
@@ -114,10 +125,6 @@ public class MainSolutionA {
                     continue;
                 }
 
-                //Raa
-                //v*v
-                //zcx
-
                 printDebugPathMatrix(matrixRows, matrixCols, path);
                 printPathDirections(path);
             }
@@ -133,8 +140,19 @@ public class MainSolutionA {
         for (int i = 0; i < rows; i++) {
             char[] currentRow = input.nextLine().toCharArray();
 
+            if (currentRow.length == 0) {
+                System.out.println("ERROR");
+                return new Object[]{null, null};
+            }
+
             for (int j = 0; j < cols; j++) {
                 char symbol = currentRow[j];
+
+                if (!ALLOWED_SYMBOLS.contains(symbol)) {
+                    System.out.println("ERROR");
+                    return new Object[]{null, null};
+                }
+
                 Node currentNode = new Node(symbol);
 
                 if (symbol == ROVER_SYMBOL) {
@@ -148,80 +166,6 @@ public class MainSolutionA {
         }
 
         return new Object[]{matrix, rover};
-    }
-
-    public static void printMatrix(int rows, int cols) {
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                System.out.print(matrix[i][j].getSymbol() + "");
-            }
-            System.out.println();
-        }
-    }
-
-    public static void printDebugPathMatrix(int rows, int cols, List<Node> path) {
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                Node currentNode = matrix[i][j];
-
-                if (path.contains(currentNode) &&
-                        currentNode.getSymbol() != TARGET_SYMBOL &&
-                        currentNode.getSymbol() != ROVER_SYMBOL) {
-                    System.out.print('.');
-                } else {
-                    System.out.print(currentNode.getSymbol());
-                }
-            }
-            System.out.println();
-        }
-    }
-
-    public static void setEachNodeAdjacencyList(int rows, int cols) {
-        for (int i = 0; i < rows; i++) {
-            Node[] currentRow = matrix[i];
-
-            for (int j = 0; j < cols; j++) {
-                Node currentNode = currentRow[j];
-                Node upNode, downNode, leftNode, rightNode;
-
-                // Up Node to the current Node
-                if (i == 0) {
-                    upNode = null;
-                } else {
-                    upNode = matrix[i - 1][j];
-                }
-
-                // Down Node to the current Node
-                if (i == rows - 1) {
-                    downNode = null;
-                } else {
-                    downNode = matrix[i + 1][j];
-                }
-
-                // Right Node to the current Node
-                if (j == cols - 1) {
-                    rightNode = null;
-                } else {
-                    rightNode = matrix[i][j + 1];
-                }
-
-                // Left Node to the current Node
-                if (j == 0) {
-                    leftNode = null;
-                } else {
-                    leftNode = matrix[i][j - 1];
-                }
-
-                // Create the links to current node
-                Edge upEdge = new Edge(currentNode, upNode, DIRECTION_UP);
-                Edge downEdge = new Edge(currentNode, downNode, DIRECTION_DOWN);
-                Edge rightEdge = new Edge(currentNode, rightNode, DIRECTION_RIGHT);
-                Edge leftEdge = new Edge(currentNode, leftNode, DIRECTION_LEFT);
-
-                Edge[] currentNodeAdjacencyList = new Edge[]{ upEdge, downEdge, rightEdge, leftEdge };
-                currentNode.setAdjacencyList(currentNodeAdjacencyList);
-            }
-        }
     }
 
     public static List<Node> BFS(Node rover) {
@@ -274,6 +218,32 @@ public class MainSolutionA {
         }
     }
 
+    public static void printMatrix(int rows, int cols) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                System.out.print(matrix[i][j].getSymbol() + "");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void printDebugPathMatrix(int rows, int cols, List<Node> path) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                Node currentNode = matrix[i][j];
+
+                if (path.contains(currentNode) &&
+                        currentNode.getSymbol() != TARGET_SYMBOL &&
+                        currentNode.getSymbol() != ROVER_SYMBOL) {
+                    System.out.print('.');
+                } else {
+                    System.out.print(currentNode.getSymbol());
+                }
+            }
+            System.out.println();
+        }
+    }
+
     public static void printPathDirections(List<Node> path) {
         String currentDirection = "";
         int currentDirectionCount = 0;
@@ -300,5 +270,53 @@ public class MainSolutionA {
         System.out.printf("%s%s%n",
                 currentDirection,
                 (currentDirectionCount != 1) ? " " + currentDirectionCount : "");
+    }
+
+    public static void setEachNodeAdjacencyList(int rows, int cols) {
+        for (int i = 0; i < rows; i++) {
+            Node[] currentRow = matrix[i];
+
+            for (int j = 0; j < cols; j++) {
+                Node currentNode = currentRow[j];
+                Node upNode, downNode, leftNode, rightNode;
+
+                // Up Node to the current Node
+                if (i == 0) {
+                    upNode = null;
+                } else {
+                    upNode = matrix[i - 1][j];
+                }
+
+                // Down Node to the current Node
+                if (i == rows - 1) {
+                    downNode = null;
+                } else {
+                    downNode = matrix[i + 1][j];
+                }
+
+                // Right Node to the current Node
+                if (j == cols - 1) {
+                    rightNode = null;
+                } else {
+                    rightNode = matrix[i][j + 1];
+                }
+
+                // Left Node to the current Node
+                if (j == 0) {
+                    leftNode = null;
+                } else {
+                    leftNode = matrix[i][j - 1];
+                }
+
+                // Create the links to current node
+                Edge upEdge = new Edge(currentNode, upNode, DIRECTION_UP);
+                Edge downEdge = new Edge(currentNode, downNode, DIRECTION_DOWN);
+                Edge rightEdge = new Edge(currentNode, rightNode, DIRECTION_RIGHT);
+                Edge leftEdge = new Edge(currentNode, leftNode, DIRECTION_LEFT);
+
+                Edge[] currentNodeAdjacencyList = new Edge[]{ upEdge, downEdge, rightEdge, leftEdge };
+                currentNode.setAdjacencyList(currentNodeAdjacencyList);
+            }
+        }
     }
 }
