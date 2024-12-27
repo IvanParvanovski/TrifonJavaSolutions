@@ -68,11 +68,7 @@ public class MainSolutionA {
                     || command.equalsIgnoreCase("left")
                     || command.equalsIgnoreCase("right")) {
 
-                if (rover == null) {
-                    System.out.println("Rover not initialised!");
-                    continue;
-                }
-
+                // The number of times the rover will go in the given direction
                 int count = 1;
                 if (splitInput.length > 1) {
                     count = Integer.parseInt(splitInput[1]);
@@ -80,26 +76,57 @@ public class MainSolutionA {
 
                 for (int i = 0; i < count; i++) {
                     Node neighbourNode = null;
+                    Node currentPositionedNode;
 
-                    if (command.equalsIgnoreCase("up")) {
-                        neighbourNode = rover.findNodeByDirectionName("up");
-                    } else if (command.equalsIgnoreCase("down")) {
-                        neighbourNode = rover.findNodeByDirectionName("down");
-                    } else if (command.equalsIgnoreCase("left")) {
-                        neighbourNode = rover.findNodeByDirectionName("left");
-                    } else if (command.equalsIgnoreCase("right")) {
-                        neighbourNode = rover.findNodeByDirectionName("right");
+                    if (rover == null && target == null && overlap != null) {
+                        currentPositionedNode = overlap;
+                    } else {
+                        currentPositionedNode = rover;
                     }
 
+                    if (command.equalsIgnoreCase("up")) {
+                        neighbourNode = currentPositionedNode.findNodeByDirectionName("up");
+                    } else if (command.equalsIgnoreCase("down")) {
+                        neighbourNode = currentPositionedNode.findNodeByDirectionName("down");
+                    } else if (command.equalsIgnoreCase("left")) {
+                        neighbourNode = currentPositionedNode.findNodeByDirectionName("left");
+                    } else if (command.equalsIgnoreCase("right")) {
+                        neighbourNode = currentPositionedNode.findNodeByDirectionName("right");
+                    }
+
+                    // When it is a border
                     if (neighbourNode == null) {
                         break;
                     }
 
-                    // Swap the adjacent nodes
+                    // If an obstacle stop
                     char neighbourNodeSymbol = neighbourNode.getSymbol();
                     if (OBSTACLES_SET.contains(neighbourNodeSymbol)) {
                         break;
                     }
+
+                    // When R is next to x
+                    if (currentPositionedNode == rover && neighbourNodeSymbol == 'x') {
+                        neighbourNode.setSymbol('X');
+                        currentPositionedNode.setSymbol(SPACE_SYMBOL);
+
+                        rover = null;
+                        target = null;
+                        overlap = neighbourNode;
+                        continue;
+                    }
+
+                    // When R and the target are the same
+                    if (currentPositionedNode == overlap) {
+                        neighbourNode.setSymbol(ROVER_SYMBOL);
+                        currentPositionedNode.setSymbol(TARGET_SYMBOL);
+
+                        rover = neighbourNode;
+                        target = currentPositionedNode;
+                        overlap = null;
+                        continue;
+                    }
+
                     neighbourNode.setSymbol(rover.getSymbol());
                     rover.setSymbol(neighbourNodeSymbol);
                     rover = neighbourNode;
@@ -151,7 +178,6 @@ public class MainSolutionA {
 
         Scanner input = new Scanner(System.in);
         Node[][] matrix = new Node[rows][cols];
-        Node rover = null;
 
         for (int i = 0; i < rows; i++) {
             char[] currentRow = input.nextLine().toCharArray();
