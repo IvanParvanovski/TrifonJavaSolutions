@@ -14,7 +14,7 @@ public class MainSolutionA {
     private static final Set<Character> OBSTACLES_SET = Set.of('/', '\\', '|', '_', '*');
     private static final Set<Character> ALLOWED_SYMBOLS = Stream.concat(
             OBSTACLES_SET.stream(),
-            Stream.of(ROVER_SYMBOL, TARGET_SYMBOL, ' ')
+            Stream.of(ROVER_SYMBOL, TARGET_SYMBOL, '␣')
     ).collect(Collectors.toSet());
 
     private static final DirectionUp DIRECTION_UP = new DirectionUp();
@@ -111,10 +111,6 @@ public class MainSolutionA {
                     continue;
                 }
 
-                // Print Path
-                System.out.printf("PATH %d\n", path.size() - 1);
-
-                // Get the directions of the path up, down, left, right
                 printPathDirections(path);
             } else if (command.equalsIgnoreCase("debug-path")) {
                 List<Node> path = BFS(rover);
@@ -126,7 +122,6 @@ public class MainSolutionA {
                 }
 
                 printDebugPathMatrix(matrixRows, matrixCols, path);
-                printPathDirections(path);
             }
         }
     }
@@ -247,29 +242,41 @@ public class MainSolutionA {
     public static void printPathDirections(List<Node> path) {
         String currentDirection = "";
         int currentDirectionCount = 0;
-        for (int i = 0; i < path.size() - 1; i++) {
+        List<String> resultMessage = new ArrayList<>();
 
+        for (int i = 0; i < path.size() - 1; i++) {
+            // Get the current and the neighbour node in the following direction
             Node currentNode = path.get(i);
             Node nextNode = path.get(i + 1);
 
             String direction = currentNode.getDirectionNameByNode(nextNode);
 
+            // Change direction
             if (!direction.equalsIgnoreCase(currentDirection)) {
+                // When it is the first direction it should not print anything, so not add
                 if (i != 0) {
-                    System.out.printf("%s%s%n",
+                    resultMessage.add(String.format("%s%s",
                             currentDirection,
-                            (currentDirectionCount != 1) ? " " + currentDirectionCount : "");
+                            (currentDirectionCount != 1) ? " " + currentDirectionCount : ""
+                    ));
                 }
 
-
+                // Change direction and reset count
                 currentDirection = direction;
                 currentDirectionCount = 0;
             }
             currentDirectionCount += 1;
         }
-        System.out.printf("%s%s%n",
+
+        // We want to print if it does not overlap
+        resultMessage.add(String.format("%s%s",
                 currentDirection,
-                (currentDirectionCount != 1) ? " " + currentDirectionCount : "");
+                (currentDirectionCount != 1) ? " " + currentDirectionCount : ""
+        ));
+
+        // Print result
+        System.out.println("PATH " + resultMessage.size());
+        System.out.println(String.join("\n", resultMessage));
     }
 
     public static void setEachNodeAdjacencyList(int rows, int cols) {
